@@ -1,0 +1,12 @@
+django
+djangorestframework
+django-filter
+djangorestframework-simplejwt
+psycopg2-binary
+drf-yasg
+celery
+redis
+django-environ
+coverage
+ipython
+pillow

@@ -8,6 +8,7 @@ class Car(models.Model):
     title = models.CharField(max_length=100, verbose_name='название')
     description = models.TextField(verbose_name='описание')
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, **NULLABLE, verbose_name='владелец')
+    price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     def __str__(self):
         return f'{self.title}'
@@ -21,6 +22,7 @@ class Moto(models.Model):
     title = models.CharField(max_length=100, verbose_name='название')
     description = models.TextField(verbose_name='описание')
     owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, **NULLABLE, verbose_name='владелец')
+    price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     def __str__(self):
         return f'{self.title}'
@@ -32,7 +34,8 @@ class Moto(models.Model):
 
 class Mileage(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE, **NULLABLE, related_name='mileage', verbose_name='машина')
-    moto = models.ForeignKey(Moto, on_delete=models.CASCADE, **NULLABLE, related_name='mileage', verbose_name='мотоцикл')
+    moto = models.ForeignKey(Moto, on_delete=models.CASCADE, **NULLABLE, related_name='mileage',
+                             verbose_name='мотоцикл')
 
     mileage = models.PositiveIntegerField(verbose_name='пробег')
     year = models.PositiveSmallIntegerField(verbose_name='год регистрации')

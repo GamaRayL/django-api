@@ -7,6 +7,7 @@ from vehicle.models import Car, Moto, Mileage
 from vehicle.permissions import IsOwnerOrStaff
 from vehicle.serializers import CarSerializer, MotoSerializer, MileageSerializer, MotoMileageSerializer, \
     MotoCreateSerializer
+from vehicle.tasks import check_mileage
 
 
 class CarViewSet(viewsets.ModelViewSet):
@@ -40,12 +41,20 @@ class MotoUpdateAPIView(generics.UpdateAPIView):
     queryset = Moto.objects.all()
     permission_classes = [IsOwnerOrStaff]
 
+
 class MotoDeleteAPIView(generics.DestroyAPIView):
     queryset = Moto.objects.all()
 
 
 class MileageCreateAPIView(generics.CreateAPIView):
     serializer_class = MileageSerializer
+
+    def perform_create(self, serializer):
+        new_mileage = serializer.save()
+        if new_mileage.car:
+            check_mileage.delay(new_mileage.car.id, 'Car')
+        else:
+            check_mileage.delay(new_mileage.moto.id, 'Moto')
 
 
 class MileageListAPIView(generics.ListAPIView):

@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from vehicle.models import Car, Moto, Mileage
+from vehicle.services import convert_currencies
 
 
 class MileageSerializer(serializers.ModelSerializer):
@@ -12,17 +13,32 @@ class MileageSerializer(serializers.ModelSerializer):
 class CarSerializer(serializers.ModelSerializer):
     last_mileage = serializers.SerializerMethodField()
     mileage = MileageSerializer(many=True)
+    usd_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Car
         fields = '__all__'
 
     @staticmethod
+    def get_usd_price(obj):
+        return convert_currencies(int(obj.price))
+
+    def create(self, validated_data):
+        mileage = validated_data.pop('mileage')
+
+        car_item = Car.objects.create(**validated_data)
+
+        for c in mileage:
+            Mileage.objects.create(**c, car=car_item)
+
+        return car_item
+
+    @staticmethod
     def get_last_mileage(obj):
-        first_mileage = obj.mileage.all().first().mileage
+        first_mileage = obj.mileage.all()
 
         if first_mileage:
-            return first_mileage
+            return first_mileage.first().mileage
         return None
 
 
